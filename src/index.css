@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Outfit:wght@300;400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #f8fafc; /* slate-50 */
+  --color-surface: #ffffff;
+  --color-surface-2: #f1f5f9; /* slate-100 */
+  --color-surface-3: #e2e8f0; /* slate-200 */
+  --color-border: #e2e8f0; /* slate-200 */
+  --color-border-light: #f8fafc; /* slate-50 */
+  --color-primary: #f97316; /* orange-500 */
+  --color-primary-dim: #ea580c; /* orange-600 */
+  --color-primary-glow: #ffedd5; /* orange-100 */
+  --color-primary-soft: #fff7ed; /* orange-50 */
+  --color-text-main: #1e293b; /* slate-800 */
+  --color-text-muted: #64748b; /* slate-500 */
+  --color-text-dim: #94a3b8; /* slate-400 */
+  --color-success: #10b981; /* emerald-500 */
+  --color-success-bg: #ecfdf5; /* emerald-50 */
+  --color-danger: #f43f5e; /* rose-500 */
+  --color-danger-bg: #fff1f2; /* rose-50 */
+  --color-accent: #6366f1; /* indigo-500 */
+
+  --font-playfair: 'Playfair Display', serif;
+  --font-outfit: 'Outfit', sans-serif;
+  --font-sans: 'Outfit', sans-serif; /* default to outfit */
+}
+
+@layer base {
+  html, body {
+    @apply bg-bg text-text-main font-outfit text-sm leading-relaxed overflow-hidden antialiased;
+    -webkit-tap-highlight-color: transparent;
+    height: 100dvh;
+    overscroll-behavior-y: none;
+  }
+}
+
+
