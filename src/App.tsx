@@ -10,13 +10,14 @@ export default function App() {
         position="bottom-center"
         toastOptions={{
           style: {
-             background: '#334155',
-             color: '#fff',
-             fontSize: '14px',
-             fontWeight: '600',
-             borderRadius: '16px',
+             background: 'var(--color-dark-surface)',
+             color: 'var(--color-text-primary)',
+             border: '1px solid var(--color-dark-border)',
+             fontSize: '13px',
+             fontWeight: '400',
+             borderRadius: '12px',
              padding: '12px 20px',
-             boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+             boxShadow: 'var(--shadow-elegant)',
              marginBottom: '80px',
           },
         }}

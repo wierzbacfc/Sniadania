@@ -25,7 +25,7 @@ export default function CalendarView() {
 
   return (
     <>
-      <SectionHeader>Ostatnie 30 dni</SectionHeader>
+      <SectionHeader className="text-xl">Ostatnie 30 dni</SectionHeader>
       
       {days.map(ds => {
         const rid = calendar[ds];
@@ -37,52 +37,51 @@ export default function CalendarView() {
           <div 
             key={ds}
             onClick={() => setPickerDate(ds)}
-            className={`flex items-center gap-4 p-4 bg-white border border-slate-200 rounded-[20px] mb-3 cursor-pointer transition-colors active:border-orange-500 shadow-sm ${isTd ? 'border-orange-200 bg-orange-50/50' : ''}`}
+            className={`flex items-center gap-4 p-4 border rounded-2xl mb-4 cursor-pointer transition-all active:scale-[0.98] shadow-sm ${isTd ? 'bg-[var(--color-dark-surface-elevated)] border-[var(--color-accent-gold)] shadow-[0_0_15px_rgba(194,163,115,0.1)]' : 'bg-[var(--color-dark-surface)] border-[var(--color-dark-border)] hover:border-white/10'}`}
           >
-            <div className="text-center min-w-[48px] shrink-0">
-              <div className={`font-sans text-2xl font-black leading-none ${isTd ? 'text-orange-600' : 'text-slate-800'}`}>
+            <div className={`text-center min-w-[50px] shrink-0 border-r border-[var(--color-dark-border)] pr-4`}>
+              <div className={`font-display text-2xl font-medium mb-1 ${isTd ? 'text-[var(--color-accent-gold)]' : 'text-white'}`}>
                 {d.getDate()}
               </div>
-              <div className={`text-[10px] uppercase font-bold tracking-[0.1em] mt-1 ${isTd ? 'text-orange-500' : 'text-slate-400'}`}>
-                {isTd ? 'dziś' : dayLabel(ds)}
+              <div className={`text-[10px] uppercase font-medium tracking-widest ${isTd ? 'text-[var(--color-accent-gold)]' : 'text-[var(--color-text-secondary)]'}`}>
+                {isTd ? 'DZIŚ' : dayLabel(ds).slice(0, 3)}
               </div>
             </div>
             
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 overflow-hidden pl-2">
               {r ? (
                 <>
-                  <div className="text-[15px] font-bold text-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{r.name}</div>
-                  <div className="text-[12px] text-slate-500 mt-0.5">{formatMonthDay(ds)}</div>
+                  <div className="text-lg font-medium text-white whitespace-nowrap overflow-hidden text-ellipsis">{r.name}</div>
+                  <div className="text-xs text-[var(--color-text-secondary)] mt-1">{formatMonthDay(ds)}</div>
                 </>
               ) : (
-                <div className="text-sm text-slate-400 font-medium">Nie zaznaczono</div>
+                <div className="text-lg text-[var(--color-text-secondary)] opacity-50 font-medium">Brak</div>
               )}
             </div>
             
-            <ChevronRight className={`shrink-0 ${isTd ? 'text-orange-300' : 'text-slate-300'}`} size={20} />
+            <ChevronRight className="shrink-0 text-[var(--color-text-secondary)] opacity-50" size={24} strokeWidth={2} />
           </div>
         );
       })}
 
       {/* Picker Modal inline */}
       {pickerDate && (
-        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-end animate-in fade-in duration-200" onClick={(e) => { if (e.target === e.currentTarget) setPickerDate(null) }}>
-          <div className="bg-white border-t border-slate-200 rounded-t-[32px] p-6 w-full max-h-[92dvh] overflow-y-auto animate-in slide-in-from-bottom duration-250 shadow-2xl">
-            <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6" />
-            <div className="font-sans text-[22px] font-black text-slate-800 mb-6 flex items-center justify-between">
-              <span>{formatMonthDay(pickerDate)} {new Date(pickerDate).getFullYear()}</span>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-end animate-in fade-in duration-300" onClick={(e) => { if (e.target === e.currentTarget) setPickerDate(null) }}>
+          <div className="bg-[var(--color-dark-surface)] border-t border-[var(--color-dark-border)] p-6 w-full max-h-[92dvh] overflow-y-auto animate-in slide-in-from-bottom duration-300 mx-auto max-w-[480px] rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+            <div className="font-display text-2xl font-medium text-white mb-8 flex items-center justify-between">
+              <span>{formatMonthDay(pickerDate)}</span>
               {calendar[pickerDate] && (
-                <button onClick={() => handleClear(pickerDate)} className="text-rose-500 text-xs font-bold uppercase tracking-wider bg-rose-50 px-3 py-1.5 rounded-lg active:scale-95 transition-all">
-                  Usuń
+                <button onClick={() => handleClear(pickerDate)} className="bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-medium px-4 py-2 rounded-lg active:scale-95 transition-all cursor-pointer hover:bg-red-500/20">
+                  Wyczyść
                 </button>
               )}
             </div>
 
-            <SectionHeader className="mb-4">Wybierz śniadanie</SectionHeader>
+            <SectionHeader className="mb-6 text-lg">Wybierz Menu</SectionHeader>
             
             {!recipes.length ? (
-              <div className="text-slate-500 text-center py-8 text-sm bg-slate-50 rounded-2xl border border-slate-200">
-                Najpierw dodaj przepisy w zakładce Przepisy
+              <div className="text-[var(--color-text-secondary)] text-center py-10 text-sm bg-[var(--color-dark-surface-elevated)] rounded-2xl border border-[var(--color-dark-border)]">
+                Brak przepisów w bazie!
               </div>
             ) : (
               <div className="flex flex-col gap-3">
@@ -92,17 +91,17 @@ export default function CalendarView() {
                     <div 
                       key={r.id}
                       onClick={() => handlePick(pickerDate, r.id)}
-                      className={`p-4 rounded-[20px] cursor-pointer select-none transition-colors active:scale-[0.98] ${isCur ? 'border-2 border-orange-500 bg-orange-50 shadow-sm' : 'border border-slate-200 bg-white hover:border-orange-300 text-slate-800'}`}
+                      className={`p-5 rounded-2xl cursor-pointer select-none transition-all active:scale-[0.98] border ${isCur ? 'bg-[var(--color-accent-gold)]/10 border-[var(--color-accent-gold)]/50 shadow-[var(--shadow-glow)]' : 'bg-[var(--color-dark-surface-elevated)] border-[var(--color-dark-border)] hover:border-white/10'}`}
                     >
-                      <div className={`text-[15px] font-bold ${isCur ? 'text-orange-700' : 'text-slate-800'}`}>{r.name}</div>
-                      <div className={`text-[12px] mt-1 font-medium ${isCur ? 'text-orange-600/70' : 'text-slate-500'}`}>{r.ingredients?.length || 0} składników</div>
+                      <div className={`text-lg font-medium leading-tight ${isCur ? 'text-[var(--color-accent-gold)]' : 'text-white'}`}>{r.name}</div>
+                      <div className="text-xs mt-2 text-[var(--color-text-secondary)]">Składniki: {r.ingredients?.length || 0}</div>
                     </div>
                   );
                 })}
               </div>
             )}
             
-            <Button size="full" onClick={() => setPickerDate(null)} className="mt-6">
+            <Button size="full" onClick={() => setPickerDate(null)} className="mt-8 mb-4" variant="secondary">
               Zamknij
             </Button>
           </div>

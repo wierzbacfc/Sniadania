@@ -77,46 +77,46 @@ export default function PantryView() {
 
   return (
     <>
-      <Card className="flex flex-row items-center gap-4 bg-orange-50 border-orange-200">
+      <Card className="flex flex-row items-center gap-4 bg-[var(--color-dark-surface-elevated)] p-5 border-[var(--color-dark-border)] border">
         <button 
           onClick={handleMicClick}
-          className={`w-14 h-14 shrink-0 rounded-2xl flex items-center justify-center text-white border-none shadow-lg cursor-pointer transition-colors ${isListening ? 'bg-rose-500 animate-[pulse_1.5s_infinite]' : 'bg-orange-500 shadow-orange-200'}`}
+          className={`w-14 h-14 shrink-0 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-gold)] ${isListening ? 'bg-[var(--color-danger)] text-white shadow-[0_0_20px_rgba(239,68,68,0.4)] animate-pulse scale-105' : 'bg-white/5 text-[var(--color-accent-gold)] border border-[var(--color-dark-border)] hover:bg-white/10'}`}
         >
-          <Mic size={24} />
+          <Mic size={24} strokeWidth={isListening ? 2 : 1.5} />
         </button>
         <div>
-          <h2 className="text-lg font-bold text-slate-800">Szybka Aktualizacja</h2>
-          <p className="text-xs text-slate-500 mt-1">{micStatus}</p>
+          <h2 className="text-xl font-display font-medium text-white tracking-wide">Szybka Akcja</h2>
+          <p className={`text-xs mt-1 transition-colors ${isListening ? 'text-[var(--color-danger)]' : 'text-[var(--color-text-secondary)]'}`}>{micStatus}</p>
         </div>
       </Card>
 
       {!keys.length ? (
-        <div className="text-center py-14 px-6 text-slate-400">
-          <div className="text-5xl mb-3.5 opacity-40">🛒</div>
-          <div className="text-base font-semibold text-slate-700">Spiżarnia pusta</div>
-          <div className="text-xs mt-2 leading-relaxed">
+        <div className="text-center py-16 px-6 border border-[var(--color-dark-border)] bg-[var(--color-dark-surface)] rounded-2xl shadow-lg mt-8">
+          <div className="text-5xl mb-6 opacity-80">🛒</div>
+          <div className="text-2xl font-display font-medium text-white mb-2">Spiżarnia pusta</div>
+          <div className="text-sm font-sans text-[var(--color-text-secondary)] leading-relaxed">
             Dodaj przepisy, aby zobaczyć składniki
           </div>
         </div>
       ) : (
         <>
-          <div className="flex justify-between items-center mb-6 px-1">
-            <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">
-              <span className="text-slate-800 text-sm mr-1">{inHome.length}</span>/ {keys.length} gotowych
+          <div className="flex justify-between items-center mb-6 px-1 mt-6">
+            <div className="text-[11px] font-medium text-[var(--color-accent-gold)] tracking-widest bg-[var(--color-accent-gold)]/10 border border-[var(--color-accent-gold)]/20 px-3 py-1.5 rounded-full">
+              {inHome.length} / {keys.length} W DOMU
             </div>
             <div className="flex gap-2">
-              <Button size="sm" onClick={fillPantry}>Wszystko</Button>
-              <Button size="sm" onClick={clearPantry}>Nic</Button>
+              <Button size="sm" variant="ghost" onClick={fillPantry}>Wszystko</Button>
+              <Button size="sm" variant="danger" onClick={clearPantry}>Nic</Button>
             </div>
           </div>
 
           {missing.length > 0 && (
-            <>
-              <SectionHeader className="justify-between items-center flex">
-                <span className="text-slate-500">Lista zakupów ({missing.length})</span>
-                <span className="text-[9px] bg-slate-200 text-slate-600 px-2 py-1 rounded-md cursor-pointer hover:bg-slate-300 transition-colors" onClick={copyShoppingList}>Kopiuj</span>
+            <div className="mb-8">
+              <SectionHeader className="justify-between items-center flex border-none">
+                <span className="text-[var(--color-danger)] text-xl">BRAKUJE ({missing.length})</span>
+                <button className="text-[11px] bg-[var(--color-dark-surface)] border border-[var(--color-dark-border)] text-white px-3 py-1.5 rounded-lg cursor-pointer active:scale-95 transition-all hover:bg-[var(--color-dark-surface-elevated)]" onClick={copyShoppingList}>Kopiuj</button>
               </SectionHeader>
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 bg-white border border-slate-200 rounded-[24px] p-5 shadow-sm mb-6">
+              <div className="flex flex-wrap gap-2.5 bg-[var(--color-dark-surface)] border border-[var(--color-dark-border)] rounded-2xl p-5 shadow-xl">
                 {missing.map((k) => (
                   <PantryItem 
                     key={k} 
@@ -126,13 +126,13 @@ export default function PantryView() {
                   />
                 ))}
               </div>
-            </>
+            </div>
           )}
 
           {inHome.length > 0 && (
-            <>
-              <SectionHeader>W domu ({inHome.length})</SectionHeader>
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 bg-white border border-slate-200 rounded-[24px] p-5 shadow-sm mb-6">
+            <div className="mb-8">
+              <SectionHeader className="text-emerald-400 text-xl border-none">W DOMU ({inHome.length})</SectionHeader>
+              <div className="flex flex-wrap gap-2.5 bg-[var(--color-dark-surface)] border border-[var(--color-dark-border)] rounded-2xl p-5 shadow-xl">
                 {inHome.map((k) => (
                   <PantryItem 
                     key={k} 
@@ -142,7 +142,7 @@ export default function PantryView() {
                   />
                 ))}
               </div>
-            </>
+            </div>
           )}
         </>
       )}
@@ -153,13 +153,13 @@ export default function PantryView() {
 const PantryItem: React.FC<{ name: string, isOn: boolean, onToggle: () => void }> = ({ name, isOn, onToggle }) => {
   return (
     <div 
-      className={`p-3 rounded-2xl border-2 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors select-none text-center h-24 ${isOn ? 'border-orange-500 bg-orange-50 shadow-sm' : 'border-slate-100 bg-white hover:border-orange-300'}`}
+      className={`px-3 py-2 border transition-all duration-300 select-none shadow-sm cursor-pointer rounded-xl flex items-center gap-2.5 active:scale-95 ${isOn ? 'border-emerald-500/30 bg-emerald-500/10' : 'border-[var(--color-dark-border)] bg-[var(--color-dark-surface-elevated)] hover:border-white/20'}`}
       onClick={onToggle}
     >
-      <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-colors ${isOn ? 'border-orange-500 bg-orange-500 text-white' : 'border-slate-300 bg-slate-50 text-slate-400'}`}>
+      <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-colors text-xs shrink-0 ${isOn ? 'bg-emerald-500 text-[var(--color-dark-bg)]' : 'border border-[var(--color-dark-border)] bg-[var(--color-dark-surface)] text-transparent'}`}>
         {isOn ? '✓' : ''}
       </div>
-      <span className={`text-[11px] font-bold leading-tight line-clamp-2 ${isOn ? 'text-orange-700' : 'text-slate-500'}`}>{name}</span>
+      <span className={`text-[12px] font-medium tracking-wide ${isOn ? 'text-emerald-50' : 'text-[var(--color-text-secondary)] hover:text-white'}`}>{name}</span>
     </div>
   );
 }

@@ -4,20 +4,20 @@ import { LucideIcon } from 'lucide-react';
 
 export const Button = React.forwardRef<
   HTMLButtonElement,
-  React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'ghost' | 'danger', size?: 'default' | 'sm' | 'full' }
->(({ className, variant = 'ghost', size = 'default', ...props }, ref) => {
+  React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'ghost' | 'danger' | 'secondary' | 'cyan', size?: 'default' | 'sm' | 'full' }
+>(({ className, variant = 'primary', size = 'default', ...props }, ref) => {
   return (
     <button
       ref={ref}
       className={cn(
-        "inline-flex items-center justify-center gap-1.5 font-outfit font-bold transition-all active:scale-95 active:opacity-85 disabled:opacity-35 disabled:pointer-events-none select-none",
+        "inline-flex items-center justify-center gap-2 font-sans font-medium tracking-wide transition-all duration-300 border focus:outline-none focus:ring-1 focus:ring-[var(--color-accent-gold)] active:scale-[0.98] whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100",
         {
-          "bg-primary text-white shadow-lg shadow-orange-200/60 hover:bg-primary-dim": variant === 'primary',
-          "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 shadow-sm": variant === 'ghost',
-          "bg-white text-danger border border-danger hover:bg-danger-bg shadow-sm": variant === 'danger',
-          "px-4 py-2.5 rounded-xl text-sm": size === 'default',
-          "px-3 py-1.5 rounded-lg text-xs": size === 'sm',
-          "w-full px-4 py-3.5 rounded-xl text-sm": size === 'full',
+          "bg-[var(--color-accent-gold)] text-black border-transparent hover:bg-[var(--color-accent-gold-hover)] shadow-[var(--shadow-glow)]": variant === 'primary' || variant === 'cyan',
+          "bg-transparent border-[var(--color-dark-border)] text-white hover:bg-[var(--color-dark-surface-elevated)]": variant === 'ghost' || variant === 'secondary',
+          "bg-transparent border-red-900/50 text-red-500 hover:bg-red-950/40": variant === 'danger',
+          "px-5 py-2.5 rounded-xl text-sm": size === 'default',
+          "px-4 py-2 rounded-lg text-xs": size === 'sm',
+          "w-full px-5 py-3 rounded-xl text-sm": size === 'full',
         },
         className
       )}
@@ -31,7 +31,7 @@ export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttribute
   <input
     ref={ref}
     className={cn(
-      "w-full bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 font-outfit text-sm px-4 py-3 outline-none transition-all placeholder:text-slate-400 focus:border-orange-400 focus:bg-white focus:shadow-[0_0_0_4px_rgba(249,115,22,0.1)]",
+      "w-full bg-[var(--color-dark-surface)] border border-[var(--color-dark-border)] rounded-xl px-4 py-3 text-sm font-sans text-white placeholder:text-[var(--color-text-secondary)] focus:outline-none focus:border-[var(--color-accent-gold)] focus:ring-1 focus:ring-[var(--color-accent-gold)] transition-all outline-none",
       className
     )}
     {...props}
@@ -43,7 +43,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, React.TextareaHTML
   <textarea
     ref={ref}
     className={cn(
-      "w-full bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 font-outfit text-sm px-4 py-3 outline-none transition-all placeholder:text-slate-400 focus:border-orange-400 focus:bg-white focus:shadow-[0_0_0_4px_rgba(249,115,22,0.1)] resize-y min-h-[100px]",
+      "w-full bg-[var(--color-dark-surface)] border border-[var(--color-dark-border)] rounded-xl px-4 py-3 text-sm font-sans text-white placeholder:text-[var(--color-text-secondary)] focus:outline-none focus:border-[var(--color-accent-gold)] focus:ring-1 focus:ring-[var(--color-accent-gold)] transition-all outline-none resize-y min-h-[100px]",
       className
     )}
     {...props}
@@ -52,19 +52,19 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, React.TextareaHTML
 Textarea.displayName = "Textarea";
 
 export const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(({ className, children, ...props }, ref) => (
-  <div ref={ref} className={cn("bg-white border border-slate-200 rounded-[24px] p-6 shadow-sm mb-4 flex flex-col", className)} {...props}>
+  <div ref={ref} className={cn("bg-[var(--color-dark-surface)] border border-[var(--color-dark-border)] rounded-2xl p-6 shadow-2xl mb-4 flex flex-col", className)} {...props}>
     {children}
   </div>
 ));
 Card.displayName = "Card";
 
-export const Badge = ({ children, variant = 'muted', className }: { children: React.ReactNode, variant?: 'success' | 'danger' | 'muted', className?: string }) => (
+export const Badge = ({ children, variant = 'muted', className }: { children: React.ReactNode, variant?: 'success' | 'danger' | 'muted' | 'mint', className?: string }) => (
   <span className={cn(
-    "inline-block px-2.5 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wide",
+    "inline-block px-3 py-1 text-[11px] font-medium tracking-widest border rounded-full shrink-0 uppercase",
     {
-      "bg-emerald-500/10 text-emerald-600": variant === 'success',
-      "bg-rose-500/10 text-rose-600": variant === 'danger',
-      "bg-slate-100 text-slate-500": variant === 'muted',
+      "bg-emerald-500/10 text-emerald-400 border-emerald-500/20": variant === 'success' || variant === 'mint',
+      "bg-red-500/10 text-red-400 border-red-500/20": variant === 'danger',
+      "bg-white/5 text-[var(--color-text-secondary)] border-white/10": variant === 'muted',
     },
     className
   )}>
@@ -73,8 +73,8 @@ export const Badge = ({ children, variant = 'muted', className }: { children: Re
 );
 
 export const SectionHeader = ({ children, className }: { children: React.ReactNode, className?: string }) => (
-  <div className={cn("text-[11px] font-bold tracking-widest uppercase text-slate-400 my-5 mb-3 flex items-center justify-between gap-4", className)}>
+  <div className={cn("text-2xl font-display font-medium text-white mb-6 flex items-center justify-between gap-4 w-full", className)}>
     <span>{children}</span>
-    <div className="flex-1 h-px bg-slate-200" />
+    <div className="flex-1 h-px bg-gradient-to-r from-[var(--color-dark-border)] to-transparent" />
   </div>
 );

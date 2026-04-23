@@ -46,48 +46,51 @@ export default function AvailableView() {
   return (
     <>
       {/* AI Bento Block */}
-      <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center gap-5 shadow-lg shadow-indigo-100 mb-6">
-        <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-3xl shrink-0">✨</div>
-        <div className="flex-1">
-          <h2 className="text-white text-lg font-bold">AI Kreator Śniadań</h2>
-          <p className="text-indigo-100 text-xs mt-1 mb-4">Wymyśl coś zupełnie nowego z Twoich produktów.</p>
-          <button 
-            onClick={handleMagic}
-            className="w-full sm:w-auto px-4 py-2.5 bg-white text-indigo-600 rounded-xl text-sm font-bold shadow-sm active:scale-95 transition-all"
-          >
-            Generuj pomysł przez AI
-          </button>
+      <div className="bg-gradient-to-br from-[var(--color-dark-surface-elevated)] to-[var(--color-dark-surface)] border border-[var(--color-dark-border)] rounded-2xl p-5 flex items-center justify-between gap-4 shadow-xl mb-6 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--color-accent-gold)]/5 rounded-full blur-2xl" />
+        <div className="flex items-center gap-4 relative z-10 flex-1">
+          <div className="w-10 h-10 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center text-xl shrink-0 shadow-sm">✨</div>
+          <div className="flex-1 pr-2">
+            <h2 className="text-white text-lg font-display font-medium leading-tight mb-0.5">AI Creator</h2>
+            <p className="text-[var(--color-text-secondary)] font-sans text-xs line-clamp-1">Kreatywne z tego co masz</p>
+          </div>
         </div>
+        <button 
+          onClick={handleMagic}
+          className="relative z-10 shrink-0 px-4 py-2 bg-[var(--color-accent-gold)] text-black rounded-lg font-medium text-xs shadow-[var(--shadow-glow)] active:scale-95 transition-all cursor-pointer hover:bg-[var(--color-accent-gold-hover)]"
+        >
+          Generuj
+        </button>
       </div>
 
       {!available.length && !almost.length ? (
-        <div className="text-center py-14 px-6 text-slate-400">
-          <div className="text-5xl mb-3.5 opacity-40">🌅</div>
-          <div className="text-base font-semibold text-slate-700">Brak dostępnych śniadań</div>
-          <div className="text-xs mt-2 leading-relaxed">
-            Zaktualizuj spiżarnię, aby zobaczyć propozycje
+        <div className="text-center py-16 px-6 border border-[var(--color-dark-border)] bg-[var(--color-dark-surface)] rounded-2xl shadow-lg">
+          <div className="text-5xl mb-6 opacity-60">🌅</div>
+          <div className="text-2xl font-display font-medium text-white mb-2">Brak możliwości</div>
+          <div className="text-sm font-sans text-[var(--color-text-secondary)] leading-relaxed">
+            Dodaj cokolwiek do spiżarni
           </div>
         </div>
       ) : (
-        <div className="bg-slate-800 rounded-3xl p-6 shadow-xl flex flex-col mb-4">
-          <div className="mb-6 flex justify-between items-end">
+        <div className="bg-[var(--color-dark-surface)] rounded-2xl p-6 shadow-2xl flex flex-col mb-4 border border-[var(--color-dark-border)]">
+          <div className="mb-6 flex justify-between items-end border-b border-white/5 pb-4">
             <div>
-              <h2 className="text-white text-lg font-semibold">Dostępne Przepisy</h2>
-              <p className="text-slate-400 text-xs">Możesz zrobić te dania już teraz</p>
+              <h2 className="text-white text-2xl font-display font-medium leading-none">W Zasięgu</h2>
+              <p className="text-emerald-400/80 font-sans text-xs mt-2 font-medium tracking-wide">MOŻESZ ROBIĆ TERAZ</p>
             </div>
           </div>
           
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-4">
             {available.map(r => (
-              <div key={r.id} className="bg-slate-700 p-4 rounded-2xl border-l-[4px] border-emerald-500 flex flex-col gap-1">
-                <div className="flex justify-between items-start gap-2">
-                  <h3 className="text-white font-medium text-[15px]">{r.name}</h3>
-                  <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-bold uppercase tracking-wider shrink-0">
-                    100% Składników
+              <div key={r.id} className="bg-[var(--color-dark-surface-elevated)] p-5 rounded-2xl flex flex-col gap-2 border border-white/5 shadow-lg group hover:border-white/10 transition-colors">
+                <div className="flex justify-between items-start gap-4">
+                  <h3 className="text-white font-sans font-medium text-lg leading-tight">{r.name}</h3>
+                  <span className="text-[10px] bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full font-medium tracking-widest shrink-0 uppercase">
+                    100%
                   </span>
                 </div>
-                <div className="text-[11px] text-slate-400 mt-1 line-clamp-1">
-                  Składniki: {r.ingredients.join(', ')}
+                <div className="text-xs font-sans text-[var(--color-text-secondary)] mt-2 leading-relaxed">
+                  {r.ingredients.join(' \u2022 ')}
                 </div>
               </div>
             ))}
@@ -95,19 +98,22 @@ export default function AvailableView() {
             {almost.map(r => {
               const missing = r.ingredients.find(i => !pantry[i])!;
               return (
-                <div key={r.id} className="bg-slate-700 p-4 rounded-2xl border-l-[4px] border-amber-500 flex flex-col gap-1 opacity-[0.85] grayscale-[0.3]">
-                  <div className="flex justify-between items-start gap-2">
-                    <h3 className="text-white font-medium text-[15px] line-through decoration-slate-500 border-none">{r.name}</h3>
-                    <span className="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded font-bold uppercase tracking-wider shrink-0">
-                      Brakuje: {missing}
+                <div key={r.id} className="bg-[var(--color-dark-bg)] p-5 rounded-2xl flex flex-col gap-3 border border-white/5 opacity-80 hover:opacity-100 transition-opacity">
+                  <div className="flex justify-between items-start gap-4">
+                    <h3 className="text-[var(--color-text-secondary)] font-sans font-medium text-lg leading-tight line-through decoration-white/20">{r.name}</h3>
+                    <span className="text-[10px] bg-red-500/10 border border-red-500/20 text-red-400 px-2.5 py-1 rounded-full font-medium tracking-widest shrink-0 uppercase">
+                      BRAKI
                     </span>
                   </div>
-                  <div className="text-[11px] text-slate-400 mt-1">
+                  <div className="text-xs font-sans text-red-300 mt-1 mb-2">
+                    Brakuje: <span className="font-semibold text-red-200">{missing}</span>
+                  </div>
+                  <div>
                     <button 
                       onClick={() => handleFindSub(missing, r.name)}
-                      className="text-amber-400 underline decoration-amber-400/30 underline-offset-2 hover:decoration-amber-400/80 transition-colors"
+                      className="bg-white/5 text-white px-4 py-2 border border-white/10 rounded-lg text-xs hover:bg-white/10 active:scale-95 transition-all cursor-pointer w-full text-center"
                     >
-                      ✨ Znajdź zamiennik przez AI
+                      Znajdź Zamiennik
                     </button>
                   </div>
                 </div>
@@ -119,16 +125,19 @@ export default function AvailableView() {
 
       {/* Substitute Modal inline */}
       {substituteInfo && (
-        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={(e) => { if (e.target === e.currentTarget) setSubstituteInfo(null) }}>
-          <div className="bg-slate-800 border border-slate-700 rounded-3xl p-6 w-full max-w-sm animate-in zoom-in-95 duration-200 shadow-2xl">
-            <div className="font-sans text-xl font-bold text-white mb-4">Zamiennik od AI</div>
-            <p className="text-slate-400 text-sm mb-5 leading-relaxed">
-              Zamiast <strong className="text-amber-400 font-medium">{substituteInfo.item}</strong> w przepisie na <strong className="text-white font-medium">{substituteInfo.recipeName}</strong>:
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-in fade-in duration-300" onClick={(e) => { if (e.target === e.currentTarget) setSubstituteInfo(null) }}>
+          <div className="bg-[var(--color-dark-surface)] border border-[var(--color-dark-border)] rounded-3xl p-8 w-full max-w-sm animate-in zoom-in-95 duration-300 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl" />
+            <div className="font-display text-3xl font-medium text-white mb-6 leading-tight relative z-10">Zamiennik</div>
+            <p className="text-[var(--color-text-secondary)] text-sm mb-6 leading-relaxed relative z-10">
+              Zamiast <span className="text-red-400 font-medium px-1">{substituteInfo.item}</span> w przepisie <span className="text-[var(--color-accent-gold)] font-medium px-1">{substituteInfo.recipeName}</span>:
             </p>
-            <div className="bg-slate-700/50 border border-indigo-500/30 border-l-4 border-l-indigo-500 rounded-2xl p-4 text-sm text-indigo-100 mb-6 italic leading-relaxed">
+            <div className="bg-[var(--color-dark-surface-elevated)] border border-white/5 rounded-2xl p-6 text-sm text-white mb-8 shadow-inner leading-relaxed relative z-10">
               "{substituteInfo.sub.trim()}"
             </div>
-            <Button size="full" onClick={() => setSubstituteInfo(null)} className="bg-white text-slate-800 hover:bg-slate-100 border-none">Zamknij</Button>
+            <Button size="full" variant="ghost" onClick={() => setSubstituteInfo(null)} className="relative z-10">
+              Zamknij
+            </Button>
           </div>
         </div>
       )}

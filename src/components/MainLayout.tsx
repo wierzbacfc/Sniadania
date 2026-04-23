@@ -5,68 +5,51 @@ import RecipesView from './RecipesView';
 import PantryView from './PantryView';
 import AvailableView from './AvailableView';
 import CalendarView from './CalendarView';
+import SettingsView from './SettingsView';
 import Modals from './Modals';
 
-export type TabId = 'recipes' | 'pantry' | 'available' | 'calendar';
+export type TabId = 'recipes' | 'pantry' | 'available' | 'calendar' | 'settings';
 
 export default function MainLayout() {
   const [activeTab, setActiveTab] = useState<TabId>('recipes');
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   
   const { recipes, pantry } = useAppStore();
   
   const availCount = recipes.filter(r => r.ingredients?.length > 0 && r.ingredients.every(i => pantry[i])).length;
 
-  const getTitle = () => {
-    switch (activeTab) {
-      case 'recipes': return 'Przepisy';
-      case 'pantry': return 'Spiżarnia';
-      case 'available': return 'Dostępne';
-      case 'calendar': return 'Dziennik';
-    }
-  };
-
   return (
-    <div className="h-[100dvh] w-full max-w-[480px] mx-auto bg-slate-50 relative overflow-hidden flex flex-col sm:border-x sm:border-slate-200 sm:shadow-2xl pt-[env(safe-area-inset-top,15px)]">
-      {/* HEADER */}
-      <header className="px-6 py-4 bg-white/90 backdrop-blur-md border-b border-slate-200 flex items-center justify-between shrink-0 relative z-10">
-        <div className="flex items-center gap-2.5">
-          <span className="text-orange-500 text-2xl leading-none">🍳</span>
-          <h1 className="font-sans text-xl font-bold text-slate-800 tracking-tight">{getTitle()}</h1>
-        </div>
-        <button 
-          onClick={() => setIsSettingsOpen(true)}
-          className="bg-white border border-slate-200 text-slate-500 p-2.5 rounded-xl shadow-sm transition-all active:bg-slate-50 hover:text-slate-800"
-        >
-          <Settings size={18} />
-        </button>
-      </header>
-
+    <div className="h-[100dvh] w-full max-w-[480px] mx-auto relative overflow-hidden flex flex-col sm:border-x sm:border-[var(--color-dark-border)] bg-[var(--color-dark-bg)]">
+      
       {/* CONTENT */}
-      <main className="flex-1 overflow-y-auto p-5 pb-[calc(72px+24px)] overflow-scrolling-touch">
+      <main className="flex-1 overflow-y-auto p-5 pt-[max(env(safe-area-inset-top),20px)] pb-[calc(110px)] overflow-scrolling-touch bg-[var(--color-dark-bg)]">
         {activeTab === 'recipes' && <RecipesView />}
         {activeTab === 'pantry' && <PantryView />}
         {activeTab === 'available' && <AvailableView />}
         {activeTab === 'calendar' && <CalendarView />}
+        {activeTab === 'settings' && <SettingsView />}
       </main>
 
       {/* TAB BAR */}
-      <nav className="absolute bottom-0 left-0 right-0 h-[72px] pb-[env(safe-area-inset-bottom,0px)] bg-white/95 backdrop-blur-md border-t border-slate-200 flex z-[100]">
+      <nav className="absolute bottom-0 left-0 right-0 h-[88px] bg-[var(--color-dark-surface)]/90 backdrop-blur-lg border-t border-[var(--color-dark-border)] flex z-[100] pb-[env(safe-area-inset-bottom)]">
         {[
           { id: 'recipes', icon: ClipboardList, label: 'Przepisy' },
           { id: 'pantry', icon: ShoppingCart, label: 'Spiżarnia' },
           { id: 'available', icon: Sparkles, label: 'Dostępne', badge: availCount },
           { id: 'calendar', icon: Calendar, label: 'Dziennik' },
+          { id: 'settings', icon: Settings, label: 'Opcje' },
         ].map(t => (
           <button
             key={t.id}
             onClick={() => setActiveTab(t.id as TabId)}
-            className={`flex-1 flex flex-col items-center justify-center gap-1.5 bg-transparent border-none text-[10px] font-sans font-bold tracking-wide uppercase transition-colors relative ${activeTab === t.id ? 'text-orange-500' : 'text-slate-400'}`}
+            className={`flex-1 flex flex-col items-center justify-center gap-1.5 bg-transparent border-none font-sans text-[10px] uppercase tracking-wider transition-all relative cursor-pointer pt-2 ${activeTab === t.id ? 'text-[var(--color-accent-gold)]' : 'text-[var(--color-text-secondary)] hover:text-white'}`}
           >
-            <t.icon size={22} strokeWidth={activeTab === t.id ? 2.5 : 2} />
-            <span>{t.label}</span>
+            {activeTab === t.id && (
+              <div className="absolute top-0 w-8 h-[2px] bg-[var(--color-accent-gold)] rounded-b-full shadow-[0_0_10px_rgba(194,163,115,0.5)]" />
+            )}
+            <t.icon size={24} strokeWidth={activeTab === t.id ? 2 : 1.5} className="mb-0.5" />
+            <span className="z-10">{t.label}</span>
             {!!t.badge && t.badge > 0 && (
-              <span className="absolute top-1 left-1/2 translate-x-3 bg-orange-500 text-white text-[9px] font-bold min-w-[16px] h-[16px] rounded-full flex items-center justify-center px-1 shadow-sm ring-2 ring-white">
+              <span className="absolute top-2 right-3 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border border-[var(--color-dark-surface)]">
                 {t.badge}
               </span>
             )}
@@ -74,7 +57,7 @@ export default function MainLayout() {
         ))}
       </nav>
       
-      <Modals isSettingsOpen={isSettingsOpen} closeSettings={() => setIsSettingsOpen(false)} />
+      <Modals />
     </div>
   );
 }
