@@ -2,25 +2,58 @@
 @import "tailwindcss";
 
 @theme {
-  --color-dark-bg: #0a0a0a;
-  --color-dark-surface: #141414;
-  --color-dark-surface-elevated: #1f1f1f;
-  --color-dark-border: #2a2a2a;
+  --color-white: var(--white);
+  --color-dark-bg: var(--bg);
+  --color-dark-surface: var(--surface);
+  --color-dark-surface-elevated: var(--surface-elevated);
+  --color-dark-border: var(--border);
   
-  --color-accent-gold: #c2a373;
-  --color-accent-gold-hover: #b09160;
+  --color-accent-gold: var(--accent-gold);
+  --color-accent-gold-hover: var(--accent-gold-hover);
   
-  --color-text-primary: #f5f5f5;
-  --color-text-secondary: #a3a3a3;
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
   
   --color-danger: #ef4444;
   --color-success: #10b981;
   
-  --shadow-elegant: 0 10px 30px -5px rgba(0, 0, 0, 0.8);
-  --shadow-glow: 0 0 20px rgba(194, 163, 115, 0.15);
+  --shadow-elegant: var(--shadow-elegant-val);
+  --shadow-glow: var(--shadow-glow-val);
 
   --font-display: 'Playfair Display', serif;
   --font-sans: 'Inter', sans-serif;
+}
+
+@layer base {
+  :root {
+    /* Hardcoded dark theme */
+    --white: #ffffff;
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --surface-elevated: #1f1f1f;
+    --border: #2a2a2a;
+    --accent-gold: #c2a373;
+    --accent-gold-hover: #b09160;
+    --text-primary: #f5f5f5;
+    --text-secondary: #a3a3a3;
+    --shadow-elegant-val: 0 10px 30px -5px rgba(0, 0, 0, 0.8);
+    --shadow-glow-val: 0 0 20px rgba(194, 163, 115, 0.15);
+  }
+
+  /* Light theme */
+  html.light {
+    --white: #111827; /* Dark text simulating white element on dark background */
+    --bg: #f4f4f5; /* changed to soft gray instead of stark white */
+    --surface: #ffffff;
+    --surface-elevated: #e4e4e7;
+    --border: #d4d4d8; /* slightly darker borders to distinguish components */
+    --accent-gold: #c2a373; /* we can keep it or make it darker: #a18051 */
+    --accent-gold-hover: #b09160;
+    --text-primary: #18181b;
+    --text-secondary: #71717a;
+    --shadow-elegant-val: 0 4px 20px -2px rgba(0, 0, 0, 0.05); /* softened shadow */
+    --shadow-glow-val: 0 0 20px rgba(194, 163, 115, 0.4);
+  }
 }
 
 @layer base {

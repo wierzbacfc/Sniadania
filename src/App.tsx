@@ -1,10 +1,21 @@
-import { AppProvider } from './store';
+import React, { useEffect } from 'react';
 import MainLayout from './components/MainLayout';
 import { Toaster } from 'react-hot-toast';
+import { useAppStore } from './store';
 
 export default function App() {
+  const { theme } = useAppStore();
+
+  useEffect(() => {
+    if (theme === 'light') {
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+    }
+  }, [theme]);
+
   return (
-    <AppProvider>
+    <>
       <MainLayout />
       <Toaster 
         position="bottom-center"
@@ -22,6 +33,6 @@ export default function App() {
           },
         }}
       />
-    </AppProvider>
+    </>
   );
 }

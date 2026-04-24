@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { Download, Upload } from 'lucide-react';
 
 export default function SettingsView() {
-  const { apiKey, apiProvider, setAppState } = useAppStore();
+  const { apiKey, apiProvider, theme, setAppState } = useAppStore();
   const [keyInput, setKeyInput] = useState(apiKey ? '••••••••' + apiKey.slice(-4) : '');
   const [provider, setProvider] = useState(apiProvider);
 
@@ -46,6 +46,48 @@ export default function SettingsView() {
 
   return (
     <div className="pb-20 mt-4">
+      <SectionHeader className="text-lg mb-4">Wygląd i Personalizacja</SectionHeader>
+      
+      <div className="flex gap-3 mb-8">
+        <button 
+          onClick={() => {
+            setAppState({ theme: 'dark' });
+          }}
+          className={`flex-1 py-4 px-4 rounded-xl border text-center font-sans text-xs font-medium transition-all duration-300 cursor-pointer flex items-center justify-center gap-2 ${theme === 'dark' ? 'border-[var(--color-accent-gold)] bg-[var(--color-accent-gold)]/10 text-[var(--color-accent-gold)] shadow-[var(--shadow-glow)]' : 'border-[var(--color-dark-border)] bg-[var(--color-dark-surface-elevated)] text-[var(--color-text-secondary)] hover:border-white/10 hover:text-[var(--color-text-primary)]'}`}
+        >
+          <span className="text-lg">🌙</span> Ciemny
+        </button>
+        <button 
+          onClick={() => {
+            setAppState({ theme: 'light' });
+          }}
+          className={`flex-1 py-4 px-4 rounded-xl border text-center font-sans text-xs font-medium transition-all duration-300 cursor-pointer flex items-center justify-center gap-2 ${theme === 'light' ? 'border-[var(--color-accent-gold)] bg-[var(--color-accent-gold)]/10 text-[var(--color-accent-gold)] shadow-[var(--shadow-glow)]' : 'border-[var(--color-dark-border)] bg-[var(--color-dark-surface-elevated)] text-[var(--color-text-secondary)] hover:border-white/10 hover:text-[var(--color-text-primary)]'}`}
+        >
+          <span className="text-lg">☀️</span> Jasny
+        </button>
+      </div>
+
+      <SectionHeader className="text-lg mb-4">Widok Przepisów</SectionHeader>
+      
+      <div className="flex gap-3 mb-8">
+        <button 
+          onClick={() => {
+            setAppState({ recipesViewMode: 'list' });
+          }}
+          className={`flex-1 py-4 px-4 rounded-xl border text-center font-sans text-xs font-medium transition-all duration-300 cursor-pointer flex flex-col items-center justify-center gap-2 ${useAppStore.getState().recipesViewMode === 'list' ? 'border-[var(--color-accent-gold)] bg-[var(--color-accent-gold)]/10 text-[var(--color-accent-gold)] shadow-[var(--shadow-glow)]' : 'border-[var(--color-dark-border)] bg-[var(--color-dark-surface-elevated)] text-[var(--color-text-secondary)] hover:border-white/10 hover:text-[var(--color-text-primary)]'}`}
+        >
+          <span className="text-lg">☰</span> Lista
+        </button>
+        <button 
+          onClick={() => {
+            setAppState({ recipesViewMode: 'grid' });
+          }}
+          className={`flex-1 py-4 px-4 rounded-xl border text-center font-sans text-xs font-medium transition-all duration-300 cursor-pointer flex flex-col items-center justify-center gap-2 ${useAppStore.getState().recipesViewMode === 'grid' ? 'border-[var(--color-accent-gold)] bg-[var(--color-accent-gold)]/10 text-[var(--color-accent-gold)] shadow-[var(--shadow-glow)]' : 'border-[var(--color-dark-border)] bg-[var(--color-dark-surface-elevated)] text-[var(--color-text-secondary)] hover:border-white/10 hover:text-[var(--color-text-primary)]'}`}
+        >
+          <span className="text-lg">⊞</span> Kafelki
+        </button>
+      </div>
+
       <SectionHeader className="text-lg mb-4">Dostawca AI</SectionHeader>
       
       <div className="flex gap-3 mb-5">

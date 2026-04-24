@@ -9,15 +9,28 @@ function getAiClient(userKey?: string) {
 
 export async function detectIngredients(text: string, apiKey: string) {
   const ai = getAiClient(apiKey);
-  const prompt = `Wyodrębnij listę składników z poniższego tekstu. Zwróć TYLKO tablicę JSON z nazwami składników po polsku, bez ilości i jednostek — tylko same nazwy produktów. Np. ["owsianka","banan","miód"]\n\n${text}`;
-  
+  const prompt = `Przeanalizuj poniższy tekst przepisu. Zwróć TYLKO wynik w formacie JSON zawierający odpowiednio pola:
+- "name": nazwa przypisu, jak potrawa się nazywa
+- "ingredients": tablica z nazwami głównych składników po polsku, bez ilości i jednostek (np. ["owsianka", "banan"]). Pomiń sól, pieprz, wodę i olej.
+- "instructions": krótka, prosta instrukcja przygotowania krok po kroku (max 3-4 zdania).
+- "tags": tablica z jedną lub dwiema etykietami. Zawsze daj ocenę czy danie jest "Słodkie" czy "Słone".
+
+Tekst:
+${text}`;
+
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
     contents: prompt,
     config: { temperature: 0.1, responseMimeType: "application/json" }
   });
-  
-  return JSON.parse(response.text || "[]") as string[];
+
+  const result = JSON.parse(response.text || "{}");
+  return {
+    name: result.name || "",
+    ingredients: Array.isArray(result.ingredients) ? result.ingredients : [],
+    instructions: result.instructions || "",
+    tags: Array.isArray(result.tags) ? result.tags : []
+  };
 }
 
 export async function findSubstitute(item: string, recipeName: string, inHome: string[], apiKey: string) {
@@ -36,7 +49,7 @@ export async function findSubstitute(item: string, recipeName: string, inHome: s
 export async function generateMagicRecipe(inHome: string[], apiKey: string) {
   const ai = getAiClient(apiKey);
   const prompt = `Jesteś kreatywnym kucharzem. Wymyśl szybkie śniadanie TYLKO (lub głównie) z tych składników: ${inHome.join(', ')}. 
-  Zwróć TYLKO JSON: {"name": "Nazwa", "tags": ["Słodkie"], "ingredients": ["składnik1", "składnik2"], "instructions": "Krótka instrukcja przygotowania."}`;
+  Zwróć TYLKO JSON: {"name": "Nazwa", "tags": ["Słodkie"], "ingredients": ["składnik1", "składnik2"], "instructions": "Krótka instrukcja przygotowania."}. Wymagane aby w tags znalazło się "Słodkie" albo "Słone".`;
   
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",

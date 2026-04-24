@@ -5,8 +5,55 @@ import { Mic } from 'lucide-react';
 import { processVoiceCommand } from '../lib/ai';
 import toast from 'react-hot-toast';
 
+const getCategory = (itemName: string) => {
+  const n = itemName.toLowerCase();
+  if (n.includes('mlek') || n.includes('ser') || n.includes('jogur') || n.includes('masł') || n.includes('jaj') || n.includes('śmietan') || n.includes('twaróg')) return 'Nabiał i Jaja';
+  if (n.includes('jabł') || n.includes('banan') || n.includes('truskawk') || n.includes('malin') || n.includes('pomarańcz') || n.includes('cytryn') || n.includes('owoc')) return 'Owoce';
+  if (n.includes('pomidor') || n.includes('cebul') || n.includes('czosnek') || n.includes('ziemniak') || n.includes('marchew') || n.includes('papryk') || n.includes('ogórek') || n.includes('warzyw') || n.includes('sałat')) return 'Warzywa';
+  if (n.includes('mąka') || n.includes('makaron') || n.includes('ryż') || n.includes('kasz') || n.includes('chleb') || n.includes('płatki') || n.includes('owsian') || n.includes('bułk')) return 'Sypkie & Pieczywo';
+  if (n.includes('kurczak') || n.includes('wieprzowina') || n.includes('wołowina') || n.includes('boczek') || n.includes('kiełbasa') || n.includes('szynk') || n.includes('mięs')) return 'Mięso';
+  if (n.includes('sól') || n.includes('pieprz') || n.includes('cukier') || n.includes('oliw') || n.includes('olej') || n.includes('ocet') || n.includes('miód') || n.includes('cynamon') || n.includes('ketchup')) return 'Przyprawy & Dodatki';
+  return 'Inne';
+};
+
+const renderCategorizedList = (items: string[], isOn: boolean, updatePantryItem: any, deletePantryItem: any) => {
+  const grouped: Record<string, string[]> = {};
+  items.forEach(item => {
+    const cat = getCategory(item);
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push(item);
+  });
+
+  const categories = Object.keys(grouped).sort();
+
+  return (
+    <div className="flex flex-col gap-4 w-full">
+      {categories.map(cat => (
+        <div key={cat} className="flex flex-col gap-2.5">
+           <div className="flex items-center gap-3 w-full">
+              <div className="h-px bg-[var(--color-dark-border)] flex-1"></div>
+              <span className="text-[9px] text-[var(--color-text-secondary)] uppercase tracking-widest font-semibold">{cat}</span>
+              <div className="h-px bg-[var(--color-dark-border)] flex-1"></div>
+           </div>
+           <div className="flex flex-wrap gap-2.5">
+             {grouped[cat].map(k => (
+                <PantryItem 
+                  key={k} 
+                  name={k} 
+                  isOn={isOn} 
+                  onToggle={() => updatePantryItem(k, !isOn)} 
+                  onDelete={() => deletePantryItem(k)}
+                />
+             ))}
+           </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 export default function PantryView() {
-  const { pantry, updatePantryItem, fillPantry, clearPantry, apiKey } = useAppStore();
+  const { pantry, updatePantryItem, deletePantryItem, fillPantry, clearPantry, apiKey } = useAppStore();
   const [isListening, setIsListening] = useState(false);
   const [micStatus, setMicStatus] = useState("Skanuj głosem");
 
@@ -114,33 +161,19 @@ export default function PantryView() {
             <div className="mb-8">
               <SectionHeader className="justify-between items-center flex border-none">
                 <span className="text-[var(--color-danger)] text-xl">BRAKUJE ({missing.length})</span>
-                <button className="text-[11px] bg-[var(--color-dark-surface)] border border-[var(--color-dark-border)] text-white px-3 py-1.5 rounded-lg cursor-pointer active:scale-95 transition-all hover:bg-[var(--color-dark-surface-elevated)]" onClick={copyShoppingList}>Kopiuj</button>
+                <button className="text-[11px] bg-[var(--color-dark-surface)] border border-[var(--color-dark-border)] text-[var(--color-text-primary)] px-3 py-1.5 rounded-lg cursor-pointer active:scale-95 transition-all hover:bg-[var(--color-dark-surface-elevated)]" onClick={copyShoppingList}>Kopiuj</button>
               </SectionHeader>
-              <div className="flex flex-wrap gap-2.5 bg-[var(--color-dark-surface)] border border-[var(--color-dark-border)] rounded-2xl p-5 shadow-xl">
-                {missing.map((k) => (
-                  <PantryItem 
-                    key={k} 
-                    name={k} 
-                    isOn={false} 
-                    onToggle={() => updatePantryItem(k, true)} 
-                  />
-                ))}
+              <div className="bg-[var(--color-dark-surface)] border border-[var(--color-dark-border)] rounded-2xl p-5 shadow-xl">
+                {renderCategorizedList(missing, false, updatePantryItem, deletePantryItem)}
               </div>
             </div>
           )}
 
           {inHome.length > 0 && (
             <div className="mb-8">
-              <SectionHeader className="text-emerald-400 text-xl border-none">W DOMU ({inHome.length})</SectionHeader>
-              <div className="flex flex-wrap gap-2.5 bg-[var(--color-dark-surface)] border border-[var(--color-dark-border)] rounded-2xl p-5 shadow-xl">
-                {inHome.map((k) => (
-                  <PantryItem 
-                    key={k} 
-                    name={k} 
-                    isOn={true} 
-                    onToggle={() => updatePantryItem(k, false)} 
-                  />
-                ))}
+              <SectionHeader className="text-emerald-500 text-xl border-none">W DOMU ({inHome.length})</SectionHeader>
+              <div className="bg-[var(--color-dark-surface)] border border-[var(--color-dark-border)] rounded-2xl p-5 shadow-xl">
+                {renderCategorizedList(inHome, true, updatePantryItem, deletePantryItem)}
               </div>
             </div>
           )}
@@ -150,16 +183,58 @@ export default function PantryView() {
   );
 }
 
-const PantryItem: React.FC<{ name: string, isOn: boolean, onToggle: () => void }> = ({ name, isOn, onToggle }) => {
+const PantryItem: React.FC<{ name: string, isOn: boolean, onToggle: () => void, onDelete: () => void }> = ({ name, isOn, onToggle, onDelete }) => {
+  const [showDelete, setShowDelete] = React.useState(false);
+  const timerRef = React.useRef<any>(null);
+
+  const startPress = () => {
+    timerRef.current = setTimeout(() => {
+      setShowDelete(true);
+    }, 600); // 600ms long press
+  };
+
+  const cancelPress = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  if (showDelete) {
+    return (
+      <div className="px-3 py-2 border border-red-500/50 bg-red-500/10 rounded-xl flex items-center gap-3 animate-in fade-in duration-200">
+        <span className="text-[12px] font-medium tracking-wide text-red-400 max-w-[100px] truncate">{name}</span>
+        <div className="flex gap-1">
+          <button 
+            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+            className="text-[10px] bg-red-500 text-white px-2 py-1 rounded-md font-medium"
+          >
+            Usuń
+          </button>
+          <button 
+            onClick={(e) => { e.stopPropagation(); setShowDelete(false); }}
+            className="text-[10px] bg-white/10 text-white px-2 py-1 rounded-md font-medium"
+          >
+            Anuluj
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div 
-      className={`px-3 py-2 border transition-all duration-300 select-none shadow-sm cursor-pointer rounded-xl flex items-center gap-2.5 active:scale-95 ${isOn ? 'border-emerald-500/30 bg-emerald-500/10' : 'border-[var(--color-dark-border)] bg-[var(--color-dark-surface-elevated)] hover:border-white/20'}`}
+      className={`px-3 py-2 border transition-all duration-300 select-none shadow-sm cursor-pointer rounded-xl flex items-center gap-2.5 active:scale-95 ${isOn ? 'border-emerald-500/30 bg-emerald-500/10' : 'border-[var(--color-dark-border)] bg-[var(--color-dark-surface-elevated)] hover:border-[var(--color-text-secondary)]'}`}
       onClick={onToggle}
+      onPointerDown={startPress}
+      onPointerUp={cancelPress}
+      onPointerLeave={cancelPress}
+      onContextMenu={(e) => { e.preventDefault(); setShowDelete(true); }} // Support for context menu (right click / long press fallback)
     >
-      <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-colors text-xs shrink-0 ${isOn ? 'bg-emerald-500 text-[var(--color-dark-bg)]' : 'border border-[var(--color-dark-border)] bg-[var(--color-dark-surface)] text-transparent'}`}>
+      <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-colors text-xs shrink-0 ${isOn ? 'bg-emerald-500 text-[var(--color-white)]' : 'border border-[var(--color-dark-border)] bg-[var(--color-dark-surface)] text-transparent'}`}>
         {isOn ? '✓' : ''}
       </div>
-      <span className={`text-[12px] font-medium tracking-wide ${isOn ? 'text-emerald-50' : 'text-[var(--color-text-secondary)] hover:text-white'}`}>{name}</span>
+      <span className={`text-[12px] font-medium tracking-wide ${isOn ? 'text-[var(--color-text-primary)]' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}>{name}</span>
     </div>
   );
 }

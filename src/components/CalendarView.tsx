@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAppStore } from '../store';
 import { Button, SectionHeader } from './ui';
 import { last30Days, dayLabel, formatMonthDay, todayStr } from '../lib/utils';
 import { ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 export default function CalendarView() {
   const { calendar, recipes, setCalendarDay } = useAppStore();
@@ -23,9 +24,67 @@ export default function CalendarView() {
     setPickerDate(null);
   };
 
+  const chartData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    days.forEach(ds => {
+      const rid = calendar[ds];
+      if (rid) {
+        counts[rid] = (counts[rid] || 0) + 1;
+      }
+    });
+
+    return Object.entries(counts)
+      .map(([rid, count]) => {
+        const recipe = recipes.find(r => r.id === rid);
+        return {
+          name: recipe ? recipe.name : 'Nieznany przepis',
+          count,
+        };
+      })
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5); // top 5
+  }, [calendar, days, recipes]);
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-[var(--color-dark-surface-elevated)] border border-[var(--color-dark-border)] p-3 rounded-lg shadow-xl shrink-0 backdrop-blur-md">
+          <p className="text-sm font-medium text-[var(--color-text-primary)] mb-1">{label}</p>
+          <p className="text-xs text-[var(--color-accent-gold)] font-medium">Zjedzono: {payload[0].value} razy</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <>
       <SectionHeader className="text-xl">Ostatnie 30 dni</SectionHeader>
+      
+      {chartData.length > 0 && (
+        <div className="mb-10 bg-[var(--color-dark-surface)] border border-[var(--color-dark-border)] rounded-2xl p-5 shadow-xl">
+          <SectionHeader className="text-sm mb-4 border-none p-0 tracking-wide text-[var(--color-text-secondary)]">Ulubione przepisy (30 dni)</SectionHeader>
+          <div className="h-[200px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <XAxis 
+                  dataKey="name" 
+                  tick={{ fill: 'var(--color-text-secondary)', fontSize: 10 }}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(value) => value.length > 10 ? value.substring(0, 10) + '...' : value}
+                />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                <Bar dataKey="count" radius={[4, 4, 4, 4]} barSize={30}>
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={index === 0 ? 'var(--color-accent-gold)' : 'var(--color-dark-border)'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
       
       {days.map(ds => {
         const rid = calendar[ds];

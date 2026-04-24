@@ -1,26 +1,17 @@
 import React, { useState } from 'react';
 import { useAppStore } from '../store';
 import { Button, Card, Badge, SectionHeader } from './ui';
-import { Plus, ChevronDown } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { todayStr } from '../lib/utils';
 import toast from 'react-hot-toast';
 
 export default function RecipesView() {
-  const { recipes, pantry, calendar, deleteRecipe } = useAppStore();
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const { recipes, pantry, calendar, recipesViewMode } = useAppStore();
   const [filter, setFilter] = useState<'all' | 'słodkie' | 'słone'>('all');
 
   const availableIds = recipes
     .filter(r => r.ingredients?.length > 0 && r.ingredients.every(i => pantry[i]))
     .map(r => r.id);
-
-  const handleDelete = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (confirm('Usunąć ten przepis?')) {
-      deleteRecipe(id);
-      toast.success('Usunięto przepis'); // Use standard UI deletion notification
-    }
-  };
 
   const openAdd = () => {
     window.dispatchEvent(new CustomEvent('open-recipe-modal'));
@@ -104,104 +95,91 @@ export default function RecipesView() {
                 Brak przepisów w tej kategorii.
              </div>
           ) : (
-            filteredRecipes.map(r => {
-              const ingN = r.ingredients?.length || 0;
-              const hasN = r.ingredients?.filter(i => pantry[i]).length || 0;
-              const isAv = availableIds.includes(r.id);
-              const stats = getStats(r.id);
-              const isExpanded = expandedId === r.id;
+            <div className={recipesViewMode === 'grid' ? "grid grid-cols-2 gap-3 mb-24" : "flex flex-col gap-3 mb-24"}>
+              {filteredRecipes.map(r => {
+                const ingN = r.ingredients?.length || 0;
+                const hasN = r.ingredients?.filter(i => pantry[i]).length || 0;
+                const isAv = availableIds.includes(r.id);
+                const stats = getStats(r.id);
 
-              // Check if it's sweet or salty to render a tiny indicator
-              const isSweet = r.tags && r.tags.some(t => t.toLowerCase().includes('słodk') || t.toLowerCase().includes('slodk'));
-              const isSalty = r.tags && r.tags.some(t => t.toLowerCase().includes('słon') || t.toLowerCase().includes('slon') || t.toLowerCase().includes('wytrawn'));
+                let availColor = 'bg-red-500';
+                if (ingN > 0) {
+                   if (isAv) availColor = 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]';
+                   else if (hasN > 0) availColor = 'bg-yellow-500';
+                }
 
-              return (
-                <Card key={r.id} className={`p-0 !mb-3 overflow-hidden ${isAv ? "ring-1 ring-[var(--color-success)]/30 bg-gradient-to-br from-[var(--color-dark-surface)] to-emerald-950/10" : ""}`}>
-                  
-                  {/* ALWAYS VISIBLE HEADER */}
-                  <div 
-                    className="flex justify-between items-center cursor-pointer select-none p-4"
-                    onClick={() => setExpandedId(isExpanded ? null : r.id)}
+                // Check if it's sweet or salty to render a tiny indicator
+                const isSweet = r.tags && r.tags.some(t => t.toLowerCase().includes('słodk') || t.toLowerCase().includes('slodk'));
+                const isSalty = r.tags && r.tags.some(t => t.toLowerCase().includes('słon') || t.toLowerCase().includes('slon') || t.toLowerCase().includes('wytrawn'));
+
+                if (recipesViewMode === 'list') {
+                   return (
+                     <Card 
+                       key={r.id} 
+                       className={`p-4 flex flex-col justify-between cursor-pointer transition-all hover:border-[var(--color-accent-gold)] relative active:scale-95 ${isAv ? "bg-gradient-to-br from-[var(--color-dark-surface)] to-emerald-950/10 border-emerald-500/30 ring-1 ring-emerald-500/10" : ""}`}
+                       onClick={(e) => openEdit(r.id, e)}
+                     >
+                        <div className="flex items-center justify-between mb-2">
+                           <div className="font-display text-lg font-medium text-[var(--color-text-primary)] leading-tight">
+                             {r.name}
+                           </div>
+                           <div className={`w-3 h-3 rounded-full shrink-0 ${availColor}`} title={isAv ? 'Dostępne' : hasN > 0 ? `Częściowo (${hasN}/${ingN})` : 'Brak składników'} />
+                        </div>
+                        <div className="flex gap-2 mb-4">
+                           {isSweet && <span className="text-[10px] uppercase tracking-wider font-semibold text-[#f472b6]">Słodkie</span>}
+                           {isSalty && <span className="text-[10px] uppercase tracking-wider font-semibold text-[#38bdf8]">Słone</span>}
+                        </div>
+                        <div className="text-[12px] text-[var(--color-text-secondary)] line-clamp-2 mb-4">
+                           {ingN > 0 ? r.ingredients.join(', ') : 'Brak podanych składników'}
+                        </div>
+                        <div className="flex justify-between items-center pt-3 border-t border-[var(--color-dark-border)]/60 text-sm">
+                           <div>
+                             <span className="text-[10px] text-[var(--color-text-secondary)] uppercase tracking-wider mr-2">Zjedzono:</span>
+                             <span className="font-medium text-[var(--color-text-primary)]">{stats.count}x</span>
+                           </div>
+                           <div>
+                             <span className="text-[10px] text-[var(--color-text-secondary)] uppercase tracking-wider mr-2">Ostatnio:</span>
+                             <span className="font-medium text-[var(--color-text-primary)]">{stats.diffDays !== null ? `${stats.diffDays} dni temu` : 'nigdy'}</span>
+                           </div>
+                        </div>
+                     </Card>
+                   );
+                }
+
+                // Grid view
+                return (
+                  <Card 
+                    key={r.id} 
+                    className={`p-4 flex flex-col justify-between cursor-pointer transition-all hover:border-[var(--color-accent-gold)] relative active:scale-95 ${isAv ? "bg-gradient-to-br from-[var(--color-dark-surface)] to-emerald-950/10 border-emerald-500/30 ring-1 ring-emerald-500/10" : ""}`}
+                    onClick={(e) => openEdit(r.id, e)}
                   >
-                    <div className="flex-1 pr-3 flex flex-col justify-center">
-                      <div className="font-display text-lg sm:text-xl font-medium text-white leading-tight flex items-center gap-2">
-                        {r.name}
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex gap-1.5 flex-wrap">
+                        {isSweet && <span className="text-[9px] uppercase tracking-wider font-semibold text-[#f472b6]">Słodkie</span>}
+                        {isSalty && <span className="text-[9px] uppercase tracking-wider font-semibold text-[#38bdf8]">Słone</span>}
                       </div>
-                      <div className="flex gap-1.5 mt-1">
-                        {isSweet && <span className="text-[10px] uppercase tracking-wider font-semibold text-[#f472b6]">Słodkie</span>}
-                        {isSalty && <span className="text-[10px] uppercase tracking-wider font-semibold text-[#38bdf8]">Słone</span>}
-                      </div>
+                      <div className={`w-2 h-2 rounded-full mt-0.5 shrink-0 ${availColor}`} title={isAv ? 'Dostępne' : hasN > 0 ? `Częściowo (${hasN}/${ingN})` : 'Brak składników'} />
                     </div>
                     
-                    <div className="flex items-center gap-2 shrink-0 pr-1">
-                      <div 
-                        className="w-7 h-7 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 font-bold text-[11px] flex items-center justify-center shrink-0 shadow-inner" 
-                        title={`Spożyto: ${stats.count}x`}
-                      >
-                        {stats.count}
-                      </div>
-                      <div 
-                        className="w-7 h-7 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 font-bold text-[11px] flex items-center justify-center shrink-0 shadow-inner"
-                        title={stats.diffDays !== null ? `Ostatnio: ${stats.diffDays} dni temu` : 'Nigdy nie jedzono'}
-                      >
-                        {stats.diffDays !== null ? `${stats.diffDays}d` : '-'}
-                      </div>
-                      <ChevronDown size={22} className={`shrink-0 ml-1 text-[var(--color-accent-gold)] transform transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                    {/* Zmniejszona przestrzeń dla nazwy przepisu (min-h, tekst, paddingi) */}
+                    <div className="font-display text-[15px] font-medium text-[var(--color-text-primary)] leading-tight mb-3 line-clamp-2 h-10">
+                      {r.name}
                     </div>
-                  </div>
-
-                  {/* EXPANDABLE BODY */}
-                  <div className={`grid transition-all duration-300 ${isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
-                    <div className="overflow-hidden">
-                      <div className="border-t border-white/5 p-4 sm:p-5 pt-4">
-                        
-                        <div className="flex items-center gap-3 mb-4">
-                          {isAv ? <Badge variant="success" className="shrink-0 text-[10px] py-1">✓ DOSTĘPNE</Badge> : (ingN > 0 && <Badge variant="muted" className="shrink-0 text-[10px] py-1">{hasN}/{ingN} SKŁAD.</Badge>)}
-                        </div>
-
-                        {r.tags && r.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-2 mb-5">
-                            {r.tags.map(t => (
-                              <span key={t} className="px-2.5 py-1 bg-[var(--color-dark-surface-elevated)] border border-[var(--color-dark-border)] rounded-full text-[11px] font-medium tracking-wide text-[var(--color-text-secondary)]">{t}</span>
-                            ))}
-                          </div>
-                        )}
-
-                        {ingN > 0 ? (
-                          <div className="text-[13px] leading-relaxed text-[var(--color-text-secondary)] mb-5">
-                            {r.ingredients.map((i, iIdx) => (
-                              <React.Fragment key={i}>
-                                <span className={pantry[i] ? "text-white" : "text-red-400 opacity-90"}>{i}</span>
-                                {iIdx < r.ingredients.length - 1 && <span className="opacity-40 mx-1.5">•</span>}
-                              </React.Fragment>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-[13px] opacity-50 mb-5">Brak podanych składników</div>
-                        )}
-
-                        {r.instructions && (
-                          <div className="text-[14px] text-[var(--color-text-secondary)] bg-white/5 p-4 rounded-xl mb-5 whitespace-pre-wrap font-sans leading-relaxed">
-                            {r.instructions}
-                          </div>
-                        )}
-
-                        <div className="flex gap-3">
-                          <Button size="default" variant="secondary" onClick={(e) => openEdit(r.id, e)} className="flex-1 text-sm py-2">
-                            Edytuj
-                          </Button>
-                          <Button size="default" variant="danger" onClick={(e) => handleDelete(r.id, e)} className="px-5 text-sm py-2">
-                            Usuń
-                          </Button>
-                        </div>
-
-                      </div>
+                    
+                    <div className="flex justify-between items-end mt-auto pt-2 border-t border-[var(--color-dark-border)]/60">
+                       <div className="col-span-1">
+                         <div className="text-[8px] text-[var(--color-text-secondary)] uppercase tracking-wider mb-0.5">Zjedzono</div>
+                         <div className="text-[13px] font-medium text-[var(--color-text-primary)]">{stats.count}x</div>
+                       </div>
+                       <div className="col-span-1 text-right">
+                         <div className="text-[8px] text-[var(--color-text-secondary)] uppercase tracking-wider mb-0.5">Ostatnio</div>
+                         <div className="text-[13px] font-medium text-[var(--color-text-primary)]">{stats.diffDays !== null ? `${stats.diffDays}d` : '-'}</div>
+                       </div>
                     </div>
-                  </div>
-
-                </Card>
-              )
-            })
+                  </Card>
+                )
+              })}
+            </div>
           )}
         </>
       )}

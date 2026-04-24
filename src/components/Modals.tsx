@@ -3,7 +3,7 @@ import { useAppStore } from '../store';
 import { Button, Input, Textarea } from './ui';
 import { detectIngredients } from '../lib/ai';
 import toast from 'react-hot-toast';
-import { Cpu, Loader2 } from 'lucide-react';
+import { Cpu, Loader2, Sparkles } from 'lucide-react';
 import { uid } from '../lib/utils';
 import { Recipe } from '../types';
 
@@ -26,9 +26,17 @@ export function RecipeModal({ onClose, editId, prefill }: { onClose: () => void,
     
     setIsDetecting(true);
     try {
-      const ings = await detectIngredients(text, apiKey);
-      setIngStr(ings.join(', '));
-      toast.success(`Wykryto ${ings.length} składników`);
+      const result = await detectIngredients(text, apiKey);
+      if (result.ingredients?.length) {
+        setIngStr(result.ingredients.join(', '));
+      }
+      if (result.instructions) {
+         setInst(result.instructions);
+      }
+      if (result.tags?.length) {
+         setTagsStr(result.tags.join(', '));
+      }
+      toast.success(`Wykryto ${result.ingredients?.length || 0} składników`);
     } catch (e) {
       toast.error('Błąd wyciągania z tekstu');
     } finally {
@@ -70,27 +78,6 @@ export function RecipeModal({ onClose, editId, prefill }: { onClose: () => void,
         <Input placeholder="np. Owsianka z bananem i miodem" value={name} onChange={e => setName(e.target.value)} />
       </div>
 
-      {!editId && !prefill && (
-        <div className="mb-6 space-y-3">
-          <label className="block text-xs font-medium text-[var(--color-text-secondary)] tracking-widest uppercase mb-2 flex items-center justify-between">
-            <span>Wklej pełny tekst</span>
-            <span className="text-[10px] text-[var(--color-accent-gold)] normal-case tracking-normal">AI ODNAJDZIE SKŁADNIKI</span>
-          </label>
-          <Textarea 
-            placeholder="Wklej tutaj treść z bloga lub notatki. AI automatycznie wyciągnie listę składników..." 
-            value={text} 
-            onChange={e => setText(e.target.value)}
-            className="min-h-[100px]"
-          />
-          <Button variant="primary" size="full" onClick={handleDetect} disabled={isDetecting}>
-            {isDetecting ? <Loader2 className="animate-spin mr-2" size={18} /> : <Cpu size={18} className="mr-2" />} 
-            {isDetecting ? 'Analizowanie...' : 'Wykryj z tekstu'}
-          </Button>
-        </div>
-      )}
-
-      {(!editId && !prefill) ? <div className="h-px bg-gradient-to-r from-transparent via-[var(--color-dark-border)] to-transparent w-full my-8" /> : null}
-
       <div className="mb-5">
         <label className="block text-xs font-medium text-[var(--color-text-secondary)] tracking-widest uppercase mb-2">Składniki (Ręcznie po przecinku)</label>
         <Textarea 
@@ -102,8 +89,35 @@ export function RecipeModal({ onClose, editId, prefill }: { onClose: () => void,
       </div>
 
       <div className="mb-5">
-        <label className="block text-xs font-medium text-[var(--color-text-secondary)] tracking-widest uppercase mb-2">Tagi / Kategoria</label>
-        <Input placeholder="np. Słodkie, Białkowe, Fit" value={tagsStr} onChange={e => setTagsStr(e.target.value)} />
+        <label className="block text-xs font-medium text-[var(--color-text-secondary)] tracking-widest uppercase mb-2">Kategoria</label>
+        <div className="flex gap-3">
+          <button 
+            type="button"
+            className={`flex-1 py-3 px-4 rounded-xl border text-center font-sans text-sm font-medium transition-all duration-300 cursor-pointer ${tagsStr.toLowerCase().includes('słodkie') ? 'border-[#f472b6] bg-[#f472b6]/10 text-[#f472b6]' : 'border-[var(--color-dark-border)] bg-[var(--color-dark-surface-elevated)] text-[var(--color-text-secondary)] hover:border-white/10 hover:text-[var(--color-text-primary)]'}`}
+            onClick={() => {
+              let tags = tagsStr.split(',').map(s => s.trim()).filter(Boolean);
+              const isSelected = tags.some(x => x.toLowerCase() === 'słodkie');
+              tags = tags.filter(x => x.toLowerCase() !== 'słodkie' && x.toLowerCase() !== 'słone' && x.toLowerCase() !== 'slone');
+              if (!isSelected) tags.push('Słodkie');
+              setTagsStr(tags.join(', '));
+            }}
+          >
+            🍩 Słodkie
+          </button>
+          <button 
+            type="button"
+            className={`flex-1 py-3 px-4 rounded-xl border text-center font-sans text-sm font-medium transition-all duration-300 cursor-pointer ${tagsStr.toLowerCase().includes('słone') || tagsStr.toLowerCase().includes('slone') ? 'border-[#38bdf8] bg-[#38bdf8]/10 text-[#38bdf8]' : 'border-[var(--color-dark-border)] bg-[var(--color-dark-surface-elevated)] text-[var(--color-text-secondary)] hover:border-white/10 hover:text-[var(--color-text-primary)]'}`}
+            onClick={() => {
+              let tags = tagsStr.split(',').map(s => s.trim()).filter(Boolean);
+              const isSelected = tags.some(x => x.toLowerCase() === 'słone' || x.toLowerCase() === 'slone');
+              tags = tags.filter(x => x.toLowerCase() !== 'słodkie' && x.toLowerCase() !== 'słone' && x.toLowerCase() !== 'slone');
+              if (!isSelected) tags.push('Słone');
+              setTagsStr(tags.join(', '));
+            }}
+          >
+            🥓 Słone
+          </button>
+        </div>
       </div>
 
       <div className="mb-10">
@@ -116,9 +130,42 @@ export function RecipeModal({ onClose, editId, prefill }: { onClose: () => void,
         />
       </div>
 
+      {(!editId && !prefill) && <div className="h-px bg-gradient-to-r from-transparent via-[var(--color-dark-border)] to-transparent w-full my-8" />}
+
+      {(!editId && !prefill) && (
+        <div className="mb-10 bg-[var(--color-dark-surface-elevated)] border border-[var(--color-accent-gold)]/20 p-4 rounded-2xl">
+          <label className="block text-[11px] font-medium text-[var(--color-accent-gold)] tracking-widest uppercase mb-2 flex items-center gap-1.5">
+            <Sparkles size={14} /> AI ODNAJDZIE SKŁADNIKI I INSTRUKCJĘ
+          </label>
+          <Textarea 
+            placeholder="Wklej tutaj treść z bloga lub notatki..." 
+            value={text} 
+            onChange={e => setText(e.target.value)}
+            className="min-h-[80px] bg-[var(--color-dark-surface)] border-none mb-3 text-sm focus:ring-0"
+          />
+          <Button variant="secondary" size="sm" onClick={handleDetect} disabled={isDetecting} className="w-full border-[var(--color-accent-gold)]/30 text-[var(--color-accent-gold)] hover:bg-[var(--color-accent-gold)]/10">
+            {isDetecting ? <Loader2 className="animate-spin mr-2" size={16} /> : <Sparkles size={16} className="mr-2" />} 
+            {isDetecting ? 'Analizowanie...' : 'Wykryj z tekstu'}
+          </Button>
+        </div>
+      )}
+
       <div className="flex gap-4 mb-safe pb-8">
-        <Button onClick={onClose} variant="ghost" className="basis-1/3 border border-[var(--color-dark-border)]">Anuluj</Button>
-        <Button variant="primary" className="basis-2/3" onClick={handleSave}>Zapisz Przepis</Button>
+        <Button onClick={onClose} variant="ghost" className="basis-1/4 border border-[var(--color-dark-border)]">Anuluj</Button>
+        {editId && (
+          <Button 
+            variant="danger" 
+            className="basis-1/4 bg-red-500/10 text-red-500 border border-red-500/20" 
+            onClick={() => {
+              if (confirm('Usunąć ten przepis?')) {
+                useAppStore.getState().deleteRecipe(editId);
+                toast.success('Usunięto przepis');
+                onClose();
+              }
+            }}
+          >Usuń</Button>
+        )}
+        <Button variant="primary" className="flex-1" onClick={handleSave}>Zapisz</Button>
       </div>
 
     </div>

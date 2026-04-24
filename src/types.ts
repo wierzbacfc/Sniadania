@@ -12,4 +12,6 @@ export interface AppState {
   calendar: Record<string, string>;
   apiKey: string;
   apiProvider: 'gemini' | 'claude';
+  theme: 'dark' | 'light';
+  recipesViewMode: 'list' | 'grid';
 }
