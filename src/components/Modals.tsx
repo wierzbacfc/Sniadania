@@ -4,11 +4,11 @@ import { Button, Input, Textarea } from './ui';
 import { detectIngredients } from '../lib/ai';
 import toast from 'react-hot-toast';
 import { Cpu, Loader2, Sparkles } from 'lucide-react';
-import { uid } from '../lib/utils';
+import { uid, last30Days } from '../lib/utils';
 import { Recipe } from '../types';
 
 export function RecipeModal({ onClose, editId, prefill }: { onClose: () => void, editId?: string, prefill?: any }) {
-  const { recipes, addRecipe, updateRecipe, apiKey } = useAppStore();
+  const { recipes, addRecipe, updateRecipe, apiKey, calendar } = useAppStore();
   
   const existing = editId ? recipes.find(r => r.id === editId) : null;
   
@@ -72,6 +72,31 @@ export function RecipeModal({ onClose, editId, prefill }: { onClose: () => void,
       <div className="font-display text-2xl font-medium text-white mb-8 leading-none">
         {editId ? 'Edytuj Przepis' : prefill ? 'Cudowny Pomysł AI' : 'Nowy Przepis'}
       </div>
+
+      {editId && (
+        <div className="mb-8">
+          <label className="block text-xs font-medium text-[var(--color-text-secondary)] tracking-widest uppercase mb-3">
+             Historia: Ostatnie 30 dni
+          </label>
+          <div className="flex gap-[2px]">
+            {last30Days().reverse().map((ds, idx) => {
+               const isActive = calendar[ds] === editId;
+               return (
+                 <div 
+                   key={idx} 
+                   title={ds}
+                   className={`flex-1 h-3 rounded-[1px] transition-all ${isActive ? 'bg-[var(--color-accent-gold)] scale-y-125 shadow-[0_0_8px_rgba(251,191,36,0.6)] z-10 relative' : 'bg-[var(--color-dark-border)] opacity-30'}`}
+                 />
+               );
+            })}
+          </div>
+          <div className="flex justify-between text-[9px] text-[var(--color-text-secondary)] mt-2.5 uppercase tracking-widest font-semibold flex-wrap">
+             <span>30 Dni Temu</span>
+             <span className="text-[var(--color-accent-gold)] font-bold">{Object.values(calendar).filter(v => v === editId).length}x RAZEM</span>
+             <span>Dziś</span>
+          </div>
+        </div>
+      )}
 
       <div className="mb-5">
         <label className="block text-xs font-medium text-[var(--color-text-secondary)] tracking-widest uppercase mb-2">Nazwa</label>
